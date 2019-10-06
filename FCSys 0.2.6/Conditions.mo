@@ -236,7 +236,10 @@ package Conditions "Models to specify and measure operating conditions"
         n=2) annotation (Placement(transformation(extent={{30,-30},{10,-10}})));
 
     protected
-      final inner constant Boolean inclTrans[Axis]={inclTransX,inclTransY,
+//      final inner constant Boolean inclTrans[Axis]={inclTransX,inclTransY,
+//          inclTransZ}
+//        "true, if each component of translational momentum is included";
+      final inner constant Boolean inclTrans[3]={inclTransX,inclTransY,
           inclTransZ}
         "true, if each component of translational momentum is included";
       final inner constant Integer n_trans=countTrue(inclTrans)
@@ -322,7 +325,7 @@ package Conditions "Models to specify and measure operating conditions"
 
       // extends FCSys.Icons.Names.Top1;
 
-      constant Integer n_trans(min=1,max=3)
+      parameter Integer n_trans(min=1,max=3)
         "Number of components of translational momentum" annotation (Dialog(
             __Dymola_label="<html><i>n</i><sub>trans</sub></html>"));
       // Note:  This must be a constant rather than a parameter due to errors
@@ -340,7 +343,7 @@ package Conditions "Models to specify and measure operating conditions"
         actualStream(chemical.sT) if environment.analysis
         "Specific entropy-temperature product of the stream";
 
-      Connectors.Chemical chemical(redeclare final constant Integer n_trans=
+      Connectors.Chemical chemical(final n_trans=
             n_trans) "Connector for a species in a chemical reaction"
         annotation (Placement(transformation(extent={{-30,-10},{-10,10}}),
             iconTransformation(extent={{-50,-10},{-30,10}})));
@@ -5193,7 +5196,10 @@ but that of the third pure substance (Medium3) is \"" + Medium3.extraPropertiesN
       protected
         final inner parameter Integer n_trans=countTrue({inclTransX,inclTransY,
             inclTransZ}) "Number of components of translational momentum";
-        final inner parameter Integer transCart[Axis]=enumerate({inclTransX,
+//        final inner parameter Integer transCart[Axis]=enumerate({inclTransX,
+//            inclTransY,inclTransZ})
+//          "Translational-momentum-component indices of the Cartesian axes";
+        final inner parameter Integer transCart[3]=enumerate({inclTransX,
             inclTransY,inclTransZ})
           "Translational-momentum-component indices of the Cartesian axes";
 
@@ -6813,12 +6819,12 @@ but that of the third pure substance (Medium3) is \"" + Medium3.extraPropertiesN
       "Mole fraction of dry gases";
 
     // Fields
-    parameter Q.Acceleration a[Axis]={0,Modelica.Constants.g_n*U.m/U.s^2,0}
+    parameter Q.Acceleration a[Axis.size]={0,Modelica.Constants.g_n*U.m/U.s^2,0}
       "Acceleration due to body forces" annotation (Dialog(__Dymola_label=
             "<html><b><i>a</i></b></html>", group="Fields"));
     // The gravity component is positive because it's added to the transient
     // term in the Species model.
-    parameter Q.ForceSpecific E[Axis]={0,0,0} "Electric field" annotation (
+    parameter Q.ForceSpecific E[Axis.size]={0,0,0} "Electric field" annotation (
         Dialog(__Dymola_label="<html><b><i>E</i></b></html>", group="Fields"));
 
     annotation (

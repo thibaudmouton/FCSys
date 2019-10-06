@@ -138,8 +138,8 @@ package Connectors "Declarative and imperative interfaces"
     flow Q.Current Ndot(nominal=U.A) "Current";
 
     // Translational
-    Q.Velocity phi[Orient](each nominal=U.cm/U.s,each start=0) "Velocity";
-    flow Q.Force mPhidot[Orient](each nominal=U.N) "Force";
+    Q.Velocity phi[Orient.size](each nominal=U.cm/U.s,each start=0) "Velocity";
+    flow Q.Force mPhidot[Orient.size](each nominal=U.N) "Force";
 
     // Thermal
     extends ThermalDiffusive;
@@ -296,11 +296,11 @@ package Connectors "Declarative and imperative interfaces"
 
     extends Translational;
 
-    // extends ThermalDiffusive;
+    extends ThermalDiffusive;
     // Note:  Inheritance isn't used to prevent overlap of the labels in Dymola
     // 2014.
-    Q.TemperatureAbsolute T(nominal=300*U.K) "Temperature";
-    flow Q.Power Qdot(nominal=U.W) "Rate of thermal conduction";
+  //  Q.TemperatureAbsolute T(nominal=300*U.K) "Temperature";
+  //  flow Q.Power Qdot(nominal=U.W) "Rate of thermal conduction";
 
     annotation (
       Documentation(info="<html><p>This connector is identical to <a href=\"modelica://FCSys.Connectors.Inter\">Inter</a> except for the icon.
@@ -344,11 +344,11 @@ package Connectors "Declarative and imperative interfaces"
 
     extends Translational;
 
-    // extends ThermalDiffusive;
+    extends ThermalDiffusive;
     // Note:  Inheritance isn't used to prevent overlap of the labels in
     // Dymola 2014.
-    Q.TemperatureAbsolute T(nominal=300*U.K) "Temperature";
-    flow Q.Power Qdot(nominal=U.W) "Rate of thermal conduction";
+//    Q.TemperatureAbsolute T(nominal=300*U.K) "Temperature";
+//    flow Q.Power Qdot(nominal=U.W) "Rate of thermal conduction";
 
     annotation (
       Documentation(info="<html><p>This connector is identical to <a href=\"modelica://FCSys.Connectors.Intra\">Intra</a> except for the icon.
@@ -395,11 +395,11 @@ package Connectors "Declarative and imperative interfaces"
 
     extends Translational;
 
-    // extends ThermalDiffusive;
+    extends ThermalDiffusive;
     // Note:  Inheritance isn't used to prevent overlap of the labels in
     // Dymola 2014.
-    Q.TemperatureAbsolute T(nominal=300*U.K) "Temperature";
-    flow Q.Power Qdot(nominal=U.W) "Rate of thermal conduction";
+//    Q.TemperatureAbsolute T(nominal=300*U.K) "Temperature";
+//    flow Q.Power Qdot(nominal=U.W) "Rate of thermal conduction";
 
     annotation (
       Documentation(info="<html>

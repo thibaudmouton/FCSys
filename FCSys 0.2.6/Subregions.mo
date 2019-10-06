@@ -941,8 +941,8 @@ package Subregions "Control volumes with multi-species transfer and storage"
     FCSys.Phases.Gas gas(
       n_inter=2,
       final n_trans=n_trans,
-      final k_inter_Phi={common.k_Phi[cartTrans],gasLiq.k_Phi[cartTrans]},
-      final k_inter_Q={common.k_Q,gasLiq.k_Q}) "Gas" annotation (Dialog(group=
+      final k_inter_Phi={common.k_Phi, gasLiq.k_Phi},
+      final k_inter_Q={common.k_Q, gasLiq.k_Q}) "Gas" annotation (Dialog(group=
             "Phases (click to edit)"),Placement(transformation(extent={{-30,-22},
               {-10,-2}})));
 
@@ -950,7 +950,7 @@ package Subregions "Control volumes with multi-species transfer and storage"
       n_inter=1,
       final n_trans=n_trans,
       'incle-Transfer'=inclHOR or inclORR,
-      final k_inter_Phi={common.k_Phi[cartTrans]},
+      final k_inter_Phi={common.k_Phi},
       final k_inter_Q={common.k_Q}) "Graphite" annotation (Dialog(group=
             "Phases (click to edit)"), Placement(transformation(extent={{10,-22},
               {30,-2}})));
@@ -958,7 +958,7 @@ package Subregions "Control volumes with multi-species transfer and storage"
     FCSys.Phases.Ionomer ionomer(
       n_inter=1,
       final n_trans=n_trans,
-      final k_inter_Phi={common.k_Phi[cartTrans]},
+      final k_inter_Phi={common.k_Phi},
       final k_inter_Q={common.k_Q}) "Ionomer" annotation (Dialog(group=
             "Phases (click to edit)"), Placement(transformation(extent={{50,-22},
               {70,-2}})));
@@ -966,8 +966,8 @@ package Subregions "Control volumes with multi-species transfer and storage"
     FCSys.Phases.Liquid liquid(
       n_inter=2,
       final n_trans=n_trans,
-      final k_inter_Phi={common.k_Phi[cartTrans],gasLiq.k_Phi[cartTrans]},
-      final k_inter_Q={common.k_Q,gasLiq.k_Q}) "Liquid" annotation (Dialog(
+      final k_inter_Phi={common.k_Phi, gasLiq.k_Phi},
+      final k_inter_Q={common.k_Q, gasLiq.k_Q}) "Liquid" annotation (Dialog(
           group="Phases (click to edit)"), Placement(transformation(extent={{-70,
               -22},{-50,-2}})));
 
@@ -1373,15 +1373,15 @@ in diagram)")}));
     FCSys.Phases.Gas gas(
       n_inter=2,
       final n_trans=n_trans,
-      final k_inter_Phi={common.k_Phi[cartTrans],gasLiq.k_Phi[cartTrans]},
-      final k_inter_Q={common.k_Q,gasLiq.k_Q}) "Gas" annotation (Dialog(group=
+      final k_inter_Phi={common.k_Phi, gasLiq.k_Phi},
+      final k_inter_Q={common.k_Q, gasLiq.k_Q}) "Gas" annotation (Dialog(group=
             "Phases (click to edit)"),Placement(transformation(extent={{-10,-22},
               {10,-2}})));
 
     FCSys.Phases.Graphite graphite(
       n_inter=1,
       final n_trans=n_trans,
-      final k_inter_Phi={common.k_Phi[cartTrans]},
+      final k_inter_Phi={common.k_Phi},
       final k_inter_Q={common.k_Q}) "Graphite" annotation (Dialog(group=
             "Phases (click to edit)"), Placement(transformation(extent={{30,-22},
               {50,-2}})));
@@ -1389,7 +1389,7 @@ in diagram)")}));
     FCSys.Phases.Liquid liquid(
       n_inter=2,
       final n_trans=n_trans,
-      final k_inter_Phi={common.k_Phi[cartTrans],gasLiq.k_Phi[cartTrans]},
+      final k_inter_Phi={common.k_Phi,gasLiq.k_Phi},
       final k_inter_Q={common.k_Q,gasLiq.k_Q}) "Liquid" annotation (Dialog(
           group="Phases (click to edit)"), Placement(transformation(extent={{-50,
               -22},{-30,-2}})));
@@ -1621,8 +1621,8 @@ in diagram)")}));
     // extends FCSys.Icons.Names.Top3;
 
     // Geometric parameters
-    inner parameter Q.Length L[Axis](each min=Modelica.Constants.small) = {U.cm,
-      U.cm,U.cm} "Lengths" annotation (Dialog(group="Geometry", __Dymola_label=
+    inner parameter Q.Length L[Axis.size](each min=Modelica.Constants.small) = {U.cm, U.cm, U.cm} "Lengths" 
+      annotation (Dialog(group="Geometry", __Dymola_label=
             "<html><b><i>L</i></b></html>"));
 
     // Assumptions
@@ -1651,25 +1651,27 @@ in diagram)")}));
         compact=true));
 
     // Auxiliary variables (for analysis)
-    final inner parameter Q.Volume V=product(L) "Volume";
-    final parameter Q.Area A[Axis]=fill(V, 3) ./ L "Cross-sectional areas";
+    final inner parameter Q.Volume V = product(L) "Volume";
+    final parameter Q.Area A[Axis.size] = fill(V, Axis.size) ./ L "Cross-sectional areas";
 
   protected
     parameter Integer n_spec(start=0) "Number of species"
       annotation (HideResult=true);
-    final inner parameter Boolean inclTrans[Axis]={inclTransX,inclTransY,
-        inclTransZ} "true, if each pair of boundaries is included";
-    final inner parameter Boolean inclRot[Axis]={inclTransY and inclTransZ,
-        inclTransZ and inclTransX,inclTransX and inclTransY}
-      "true, if each axis of rotation has all its tangential boundaries included";
+  
     final parameter Integer n_trans=countTrue(inclTrans)
       "Number of transport axes";
     final inner parameter Integer cartRot[:]=index(inclRot)
       "Cartesian-axis indices of the components of rotational momentum";
-    final inner parameter Integer cartTrans[n_trans]=index(inclTrans)
+    final inner parameter Integer cartTrans[:]=index(inclTrans)
       "Cartesian-axis indices of the transport axes";
-    final inner parameter Integer transCart[Axis]=enumerate(inclTrans)
+    final inner parameter Integer transCart[:]=enumerate(inclTrans)
       "Transport-axis indices of the Cartesian axes";
+      
+    final inner parameter Boolean inclTrans[Axis.size]={inclTransX,inclTransY,
+        inclTransZ} "true, if each pair of boundaries is included";
+    final inner parameter Boolean inclRot[Axis.size]={inclTransY and inclTransZ,
+        inclTransZ and inclTransX,inclTransX and inclTransY}
+      "true, if each axis of rotation has all its tangential boundaries included";
 
     annotation (
       defaultComponentPrefixes="replaceable",

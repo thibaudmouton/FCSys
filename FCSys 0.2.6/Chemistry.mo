@@ -357,7 +357,7 @@ package Chemistry "Chemical reactions and related models"
   model HOR "Hydrogen oxidation reaction"
     extends FCSys.Icons.Names.Top2;
 
-    constant Integer n_trans(min=0, max=3)
+    parameter Integer n_trans(min=0, max=3)
       "Number of components of translational momentum" annotation (Dialog(
           __Dymola_label="<html><i>n</i><sub>trans</sub></html>"));
     // Note:  This must be a constant rather than a parameter due to errors in
@@ -381,15 +381,15 @@ package Chemistry "Chemical reactions and related models"
           rotation=0,
           origin={-10,0})));
 
-    Connectors.Chemical 'cheme-'(redeclare final constant Integer n_trans=
+    Connectors.Chemical 'cheme-'(final n_trans=
           n_trans) "Connector for e-" annotation (Placement(transformation(
             extent={{20,0},{40,20}}), iconTransformation(extent={{-10,-10},{10,
               10}})));
-    Connectors.Chemical 'chemH+'(redeclare final constant Integer n_trans=
+    Connectors.Chemical 'chemH+'(final n_trans=
           n_trans) "Connector for H+" annotation (Placement(transformation(
             extent={{20,-20},{40,0}}), iconTransformation(extent={{30,-10},{50,
               10}})));
-    Connectors.Chemical chemH2(redeclare final constant Integer n_trans=n_trans)
+    Connectors.Chemical chemH2(final n_trans=n_trans)
       "Connector for H2" annotation (Placement(transformation(extent={{-40,-10},
               {-20,10}}), iconTransformation(extent={{-50,-10},{-30,10}})));
     // Note:  These redeclarations are necessary due to errors in Dymola 2014.
@@ -437,7 +437,7 @@ package Chemistry "Chemical reactions and related models"
   model ORR "Oxygen reduction reaction"
     extends FCSys.Icons.Names.Top2;
 
-    constant Integer n_trans(min=0, max=3)
+    parameter Integer n_trans(min=0, max=3)
       "Number of components of translational momentum" annotation (Dialog(
           __Dymola_label="<html><i>n</i><sub>trans</sub></html>"));
     // Note:  This must be a constant rather than a parameter due to errors in
@@ -469,18 +469,18 @@ package Chemistry "Chemical reactions and related models"
           rotation=0,
           origin={10,-10})));
 
-    Connectors.Chemical 'cheme-'(redeclare final constant Integer n_trans=
+    Connectors.Chemical 'cheme-'(final n_trans=
           n_trans) "Connector for e-" annotation (Placement(transformation(
             extent={{-40,0},{-20,20}}), iconTransformation(extent={{-70,-10},{-50,
               10}})));
-    Connectors.Chemical 'chemH+'(redeclare final constant Integer n_trans=
+    Connectors.Chemical 'chemH+'(final n_trans=
           n_trans) "Connector for H+" annotation (Placement(transformation(
             extent={{-40,-20},{-20,0}}), iconTransformation(extent={{-30,-10},{
               -10,10}})));
-    Connectors.Chemical chemO2(redeclare final constant Integer n_trans=n_trans)
+    Connectors.Chemical chemO2(final n_trans=n_trans)
       "Connector for O2" annotation (Placement(transformation(extent={{-40,-40},
               {-20,-20}}), iconTransformation(extent={{10,-10},{30,10}})));
-    Connectors.Chemical chemH2O(redeclare final constant Integer n_trans=
+    Connectors.Chemical chemH2O(final n_trans=
           n_trans) "Connector for H2O" annotation (Placement(transformation(
             extent={{20,-20},{40,0}}), iconTransformation(extent={{50,-10},{70,
               10}})));

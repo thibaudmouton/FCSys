@@ -31,8 +31,8 @@ package Phases "Mixtures of species"
       n_intra=2,
       n_inter=n_inter,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],H2_H2O.k_Phi[cartTrans]},
-      k_intra_Q={common.k_Q,H2_H2O.k_Q}) "H2 model" annotation (
+      k_intra_Phi={common.k_Phi, H2_H2O.k_Phi},
+      k_intra_Q={common.k_Q, H2_H2O.k_Q}) "H2 model" annotation (
       __Dymola_choicesFromPackage=true,
       Dialog(
         group="Species",
@@ -61,8 +61,7 @@ package Phases "Mixtures of species"
       n_intra=4,
       n_inter=n_inter,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],H2_H2O.k_Phi[cartTrans],H2O_N2.k_Phi[
-          cartTrans],H2O_O2.k_Phi[cartTrans]},
+      k_intra_Phi={common.k_Phi, H2_H2O.k_Phi, H2O_N2.k_Phi, H2O_O2.k_Phi},
       k_intra_Q={common.k_Q,H2_H2O.k_Q,H2O_N2.k_Q,H2O_O2.k_Q}) "H2O model"
       annotation (
       __Dymola_choicesFromPackage=true,
@@ -93,8 +92,7 @@ package Phases "Mixtures of species"
       n_intra=3,
       n_inter=n_inter,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],H2O_N2.k_Phi[cartTrans],N2_O2.k_Phi[
-          cartTrans]},
+      k_intra_Phi={common.k_Phi, H2O_N2.k_Phi, N2_O2.k_Phi},
       k_intra_Q={common.k_Q,H2O_N2.k_Q,N2_O2.k_Q}) "N2 model" annotation (
       __Dymola_choicesFromPackage=true,
       Dialog(
@@ -124,8 +122,7 @@ package Phases "Mixtures of species"
       n_intra=3,
       n_inter=n_inter,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],H2O_O2.k_Phi[cartTrans],N2_O2.k_Phi[
-          cartTrans]},
+      k_intra_Phi={common.k_Phi, H2O_O2.k_Phi, N2_O2.k_Phi},
       k_intra_Q={common.k_Q,H2O_O2.k_Q,N2_O2.k_Q}) "O2 model" annotation (
       __Dymola_choicesFromPackage=true,
       Dialog(
@@ -136,23 +133,23 @@ package Phases "Mixtures of species"
       Placement(transformation(extent={{50,10},{70,30}})));
 
     // Independence factors
-    ExchangeParams common(k_Phi={inf,inf,inf}, k_Q=0) if n_spec > 0
+    ExchangeParams common(k_Phi=fill(inf,n_trans), k_Q=0) if n_spec > 0
       "Among species in the phase"
       annotation (Dialog(group="Independence factors"));
     ExchangeParams H2_H2O(k_Phi=fill(MobilityFactors.k_H2_H2O(p_A=environment.p_dry,
-          p_B=environment.p_H2O), 3), k_Q=inf) if inclH2 or inclH2O
+          p_B=environment.p_H2O), n_trans), k_Q=inf) if inclH2 or inclH2O
       "<html>Between H<sub>2</sub> and H<sub>2</sub>O</html>"
       annotation (Dialog(group="Independence factors"));
     ExchangeParams H2O_N2(k_Phi=fill(MobilityFactors.k_H2O_N2(p_A=environment.p_H2O,
-          p_B=environment.p_dry - environment.p_O2), 3), k_Q=inf) if inclH2O
+          p_B=environment.p_dry - environment.p_O2), n_trans), k_Q=inf) if inclH2O
        or inclN2 "<html>Between H<sub>2</sub>O and N<sub>2</sub></html>"
       annotation (Dialog(group="Independence factors"));
     ExchangeParams H2O_O2(k_Phi=fill(MobilityFactors.k_H2O_O2(p_A=environment.p_H2O,
-          p_B=environment.p_O2), 3), k_Q=inf) if inclH2O or inclO2
+          p_B=environment.p_O2), n_trans), k_Q=inf) if inclH2O or inclO2
       "<html>Between H<sub>2</sub>O and O<sub>2</sub></html>"
       annotation (Dialog(group="Independence factors"));
     ExchangeParams N2_O2(k_Phi=fill(MobilityFactors.k_N2_O2(p_A=environment.p_dry
-           - environment.p_O2, p_B=environment.p_O2), 3), k_Q=inf) if inclN2
+           - environment.p_O2, p_B=environment.p_O2), n_trans), k_Q=inf) if inclN2
        or inclO2 "<html>Between N<sub>2</sub> and O<sub>2</sub></html>"
       annotation (Dialog(group="Independence factors"));
 
@@ -652,6 +649,7 @@ package Phases "Mixtures of species"
         points={{24,-29},{24,-68},{46,-68}},
         color={221,23,47},
         smooth=Smooth.None));
+//    WARNING : this seems to cause problems with the new front end in OM:
     connect('e-Transfer'.inert, 'C+'.intra[1]) annotation (Line(
         points={{12,34},{-16,34},{-16,-29}},
         color={221,23,47},
@@ -806,8 +804,7 @@ package Phases "Mixtures of species"
       n_intra=3,
       n_inter=n_inter,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],'H+_SO3-'.k_Phi[cartTrans],
-          'H2O_SO3-'.k_Phi[cartTrans]},
+      k_intra_Phi={common.k_Phi,'H+_SO3-'.k_Phi,'H2O_SO3-'.k_Phi},
       k_intra_Q={common.k_Q,'H+_SO3-'.k_Q,'H2O_SO3-'.k_Q}) "SO3- model"
       annotation (
       __Dymola_choicesFromPackage=true,
@@ -838,8 +835,7 @@ package Phases "Mixtures of species"
       n_intra=3,
       n_inter=n_inter,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],'H+_H2O'.k_Phi[cartTrans],'H+_SO3-'.k_Phi[
-          cartTrans]},
+      k_intra_Phi={common.k_Phi,'H+_H2O'.k_Phi,'H+_SO3-'.k_Phi},
       k_intra_Q={common.k_Q,'H+_SO3-'.k_Q,'H+_H2O'.k_Q}) "H+ model" annotation
       (
       __Dymola_choicesFromPackage=true,
@@ -870,8 +866,7 @@ package Phases "Mixtures of species"
       n_intra=3,
       n_inter=0,
       kL=kL,
-      k_intra_Phi={common.k_Phi[cartTrans],'H+_H2O'.k_Phi[cartTrans],'H2O_SO3-'.k_Phi[
-          cartTrans]},
+      k_intra_Phi={common.k_Phi,'H+_H2O'.k_Phi,'H2O_SO3-'.k_Phi},
       k_intra_Q={common.k_Q,'H+_H2O'.k_Q,'H2O_SO3-'.k_Q}) "H2O model"
       annotation (
       __Dymola_choicesFromPackage=true,
@@ -923,17 +918,17 @@ package Phases "Mixtures of species"
               -10,-30}})));
 
     // Independence factors
-    ExchangeParams common(k_Phi={inf,inf,inf},k_Q=0) if n_spec > 0
+    ExchangeParams common(k_Phi=fill(inf, n_trans),k_Q=0) if n_spec > 0
       "Among all species in the phase"
       annotation (Dialog(group="Exchange (click to edit)"));
-    ExchangeParams 'H+_SO3-'(final k_Phi, k_Q=inf) if 'inclSO3-' or 'inclH+'
+    ExchangeParams 'H+_SO3-'(k_Phi=fill(0, n_trans), k_Q=inf) if 'inclSO3-' or 'inclH+'
       "<html>Between H<sup>+</sup> and SO<sub>3</sub><sup>-</sup>)</html>"
       annotation (Dialog(group="Exchange (click to edit)"));
-    ExchangeParams 'H+_H2O'(k_Phi={0.02,0.02,0.02}, k_Q=inf) if 'inclH+' or
+    ExchangeParams 'H+_H2O'(k_Phi=fill(0.02, n_trans), k_Q=inf) if 'inclH+' or
       inclH2O "<html>Between H<sup>+</sup> and H<sub>2</sub>O</html>"
       annotation (Dialog(group="Exchange (click to edit)"));
 
-    ExchangeParams 'H2O_SO3-'(k_Phi={1,1,1}, k_Q=inf) if 'inclSO3-' or inclH2O
+    ExchangeParams 'H2O_SO3-'(k_Phi=fill(1, n_trans), k_Q=inf) if 'inclSO3-' or inclH2O
       "<html>Between H<sub>2</sub>O and SO<sub>3</sub><sup>-</sup></html>"
       annotation (Dialog(group="Exchange (click to edit)"));
 
@@ -1314,12 +1309,12 @@ protected
       annotation (Dialog(connectorSizing=true),HideResult=true);
 
     // Geometric parameters
-    parameter Q.NumberAbsolute k[Axis](
+    inner parameter Q.NumberAbsolute k[Axis.size](
       each min=Modelica.Constants.small,
       each final nominal=1) = {1,1,1} if n_spec > 0
       "Length factors for transport" annotation (Dialog(group="Geometry",
           __Dymola_label="<html><b><i>k</i></b></html>"));
-    parameter Integer n_trans=1 "Number of transport axes"
+    parameter Integer n_trans=3 "Number of transport axes"
       annotation (HideResult=true);
     // Note:  This can't be an inner/outer parameter in Dymola 2014.
     inner Q.Volume V=0 if n_spec > 0 "Volume of the phase";
@@ -1339,22 +1334,22 @@ protected
       "Volumetric fill fraction";
 
   protected
-    outer parameter Q.Length L[Axis] if n_spec > 0 "Length of the subregion"
+    outer parameter Q.Length L[Axis.size] if n_spec > 0 "Length of the subregion"
       annotation (missingInnerMessage="This model should be used within a subregion model.
 ");
-    final parameter Q.Length kL[:]=k[cartTrans] .* L[cartTrans] if n_spec > 0
+    final parameter Q.Length kL[:] = k .* L if n_spec > 0
       "Effective transport lengths";
-    final inner Q.Area Aprime[n_trans]=fill(V, n_trans) ./ L[cartTrans] if
+    final inner Q.Area Aprime[n_trans]=fill(V, n_trans) ./ L if
       n_spec > 0 "Effective cross-sectional areas";
-    outer parameter Integer cartTrans[:]
+    outer parameter Integer cartTrans[n_trans]
       "Cartesian-axis indices of the components of translational momentum"
       annotation (missingInnerMessage="This model should be used within a subregion model.
 ");
-    outer parameter Integer transCart[:]
+    outer parameter Integer transCart[n_trans]
       "Boundary-pair indices of the Cartesian axes" annotation (
         missingInnerMessage="This model should be used within a subregion model.
 ");
-    outer parameter Boolean inclTrans[Axis]
+    outer parameter Boolean inclTrans[Axis.size]
       "true, if each pair of boundaries is included" annotation (
         missingInnerMessage="This model should be used within a subregion model.
 ");
@@ -1383,7 +1378,7 @@ public
   record ExchangeParams "Independence factors for an exchange process"
     extends Modelica.Icons.Record;
 
-    parameter Q.NumberAbsolute k_Phi[Axis]={1,1,1} "Translational" annotation (
+    parameter Q.NumberAbsolute k_Phi[:]={1,1,1} "Translational" annotation (
         Evaluate=true, Dialog(__Dymola_label=
             "<html><i>k</i><sub>&Phi;</sub></html>"));
     parameter Q.NumberAbsolute k_Q=1 "Thermal" annotation (Evaluate=true,

@@ -141,9 +141,9 @@ package Species "Dynamic models of chemical species"
           final upstreamZ=false,
           final initMaterial=Init.none,
           final initEnergy=Init.none,
-          final consTransX=ConsTrans.steady,
-          final consTransY=ConsTrans.steady,
-          final consTransZ=ConsTrans.steady,
+          final consTransX=Integer(ConsTrans.steady),
+          final consTransY=Integer(ConsTrans.steady),
+          final consTransZ=Integer(ConsTrans.steady),
           final consEnergy=ConsThermo.steady,
           final zeta=0,
           final eta=Modelica.Constants.inf,
@@ -214,9 +214,9 @@ then internal inductance is included according to the relative permeability (&mu
           final upstreamZ=false,
           final initMaterial=Init.none,
           final consEnergy=ConsThermo.steady,
-          consTransX=ConsTrans.steady,
-          consTransY=ConsTrans.steady,
-          consTransZ=ConsTrans.steady,
+          consTransX=Integer(ConsTrans.steady),
+          consTransY=Integer(ConsTrans.steady),
+          consTransZ=Integer(ConsTrans.steady),
           final zeta=0,
           final N_IC,
           redeclare parameter Q.ResistivityThermal theta=U.m*U.K/(0.1661*U.W),
@@ -931,6 +931,7 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
     import FCSys.Utilities.Coordinates.after;
     import FCSys.Utilities.Coordinates.before;
     import FCSys.Utilities.Coordinates.cartWrap;
+//    import FCSys.Utilities.Coordinates.i2Axis;
     import FCSys.Utilities.Delta;
     import FCSys.Utilities.Sigma;
     import FCSys.Utilities.inSign;
@@ -974,7 +975,7 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
             "Chemical parameters", __Dymola_label="<html>&tau;&prime;</html>"));
 
     // Geometry
-    Q.Length kL[:]=L[cartTrans] "Effective transport length" annotation (Dialog(
+    Q.Length kL[n_trans] = L "Effective transport length" annotation (Dialog(
           group="Geometry", __Dymola_label=
             "<html><b><i>k&nbsp;L</i></b></html>"));
     // Note:  The size is n_trans, but it isn't specified here to
@@ -992,17 +993,17 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
             "Formulation of the conservation equations"),
       choices(__Dymola_checkBox=true));
 
-    parameter ConsTrans consTransX=ConsTrans.dynamic
+    parameter Integer consTransX=Integer(ConsTrans.dynamic)
       "X-axis translational momentum" annotation (Evaluate=true, Dialog(
         tab="Assumptions",
         group="Formulation of the conservation equations",
         enable=inclTrans[1]));
-    parameter ConsTrans consTransY=ConsTrans.dynamic
+    parameter Integer consTransY=Integer(ConsTrans.dynamic)
       "Y-axis translational momentum" annotation (Evaluate=true, Dialog(
         tab="Assumptions",
         group="Formulation of the conservation equations",
         enable=inclTrans[2]));
-    parameter ConsTrans consTransZ=ConsTrans.dynamic
+    parameter Integer consTransZ=Integer(ConsTrans.dynamic)
       "Z-axis translational momentum" annotation (Evaluate=true, Dialog(
         tab="Assumptions",
         group="Formulation of the conservation equations",
@@ -1047,11 +1048,14 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
         group="Flow conditions",
         compact=true),
       choices(__Dymola_checkBox=true));
-    parameter Q.NumberAbsolute Nu_Phi[Axis]={4,4,4}
+      
+//    parameter Q.NumberAbsolute Nu_Phi[Axis.size]={4,4,4}
+    parameter Q.NumberAbsolute Nu_Phi[Axis.size] = fill(4, Axis.size)
       "Translational Nusselt numbers" annotation (Dialog(
         tab="Assumptions",
         group="Flow conditions",
         __Dymola_label="<html><b><i>Nu</i><sub>&Phi;</sub></b></html>"));
+        
     parameter Q.NumberAbsolute Nu_Q=1 "Thermal Nusselt number" annotation (
         Dialog(
         tab="Assumptions",
@@ -1199,12 +1203,12 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
       "Relative rate of energy (internal, flow, and kinetic) due to reactions and phase change";
     output Q.Power Edot_AT(stateSelect=StateSelect.never) = sum((Data.h(
       boundaries[i, :].T, boundaries[i, :].p) - {h,h} + (phi_boundaries[i, :]
-       .^ 2 + sum(boundaries[i, :].phi[orient] .^ 2 for orient in Orient) -
+       .^ 2 + sum(boundaries[i, :].phi[orient] .^ 2 for orient in 1:Orient.size) -
       fill(phi*phi, 2))*(Data.m/2))*boundaries[i, :].Ndot for i in 1:n_trans)
       if environment.analysis
       "Relative rate of energy (internal, flow, and kinetic) due to advective transport";
     output Q.Power Edot_DT(stateSelect=StateSelect.never) = sum(sum(boundaries[
-      i, :].phi[orient]*boundaries[i, :].mPhidot[orient] for orient in Orient)
+      i, :].phi[orient]*boundaries[i, :].mPhidot[orient] for orient in 1:Orient.size)
       for i in 1:n_trans) + sum(boundaries.Qdot) if environment.analysis
       "Rate of diffusion of energy from other subregions";
     // Note:  The structure of the problem shouldn't change if these
@@ -1229,29 +1233,31 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
   protected
     outer Q.Area Aprime[n_trans] "Effective cross-sectional area" annotation (
         missingInnerMessage="This model should be used within a phase model.");
-    outer parameter Boolean inclRot[3]
+
+    outer parameter Boolean inclRot[Axis.size]
       "true, if each axis of rotation has all its tangential boundaries included"
       annotation (missingInnerMessage="This model should be used within a subregion model.
 ");
-    outer parameter Boolean inclTrans[3]
+
+    outer parameter Boolean inclTrans[Axis.size]
       "true, if each transport axis is included" annotation (
         missingInnerMessage="This model should be used within a subregion model.
 ");
     // Note:  The size of inclRot and inclTrans is also Axis, but it can't be
     // specified here due to an error in Dymola 2014.
-    outer parameter Integer cartRot[:]
+    outer parameter Integer cartRot[n_trans]
       "Cartesian-axis indices of the components of rotational momentum"
       annotation (missingInnerMessage="This model should be used within a subregion model.
 ");
     // Note:  The size of cartRot is n_trans, but it can't be
     // specified here due to an error in Dymola 2014.
-    outer parameter Integer transCart[3]
+    outer parameter Integer transCart[Axis.size]
       "Boundary-pair indices of the Cartesian axes" annotation (
         missingInnerMessage="This model should be used within a subregion model.
 ");
     // Note:  The size is also Axis, but it can't be specified here due
     // to an error in Dymola 2014.
-    final parameter ConsTrans consTrans[n_trans]=selectIntegers({consTransX,
+    final parameter Integer consTrans[n_trans]=selectIntegers({consTransX,
         consTransY,consTransZ}, cartTrans)
       "Formulation of the translational conservation equations for the transport axes"
       annotation (HideResult=true);
@@ -1261,7 +1267,7 @@ and &theta; = <code>U.m*U.K/(613e-3*U.W)</code>) are of H<sub>2</sub>O liquid at
       annotation (HideResult=true);
 
     // Additional aliases (for common terms)
-    Q.Force mPhidot_boundaries[n_trans, Side, Orient](each nominal=U.N, each
+    Q.Force mPhidot_boundaries[n_trans, Side, Orient.size](each nominal=U.N, each
         stateSelect=StateSelect.never) "Directly-calculated shear forces";
 
     outer Conditions.Environment environment "Environmental conditions";
@@ -1411,20 +1417,21 @@ Choose any condition besides none.");
     for i in 1:n_trans loop
       for side in Side loop
         // Material
-        (if consTrans[i] == ConsTrans.dynamic then kL[i]*Data.m*der(boundaries[
+        (if consTrans[i] == Integer(ConsTrans.dynamic) then kL[enumAxis[i]]*Data.m*der(boundaries[
           i, side].Ndot)/U.s else 0) = (Aprime[i]*(boundaries[i, side].p - p)
            + inSign(side)*Data.m*phi_boundaries[i, side]*boundaries[i, side].Ndot
            - minusDeltaf[i])*(if upstream[i] then 1 + exp(-zeta*Data.beta(T, p)
           *boundaries[i, side].Ndot/(2*Aprime[i])) else 2) + inSign(side)*f[i];
 
         // Translational momentum
-        kL[i]*eta*mPhidot_boundaries[i, side, Orient.after] = Aprime[i]*Nu_Phi[
+        kL[enumAxis[i]]*eta*mPhidot_boundaries[i, side, Orient.after] = Aprime[i]*Nu_Phi[
           after(cartTrans[i])]*(boundaries[i, side].phi[Orient.after] - (if
           inclTrans[after(cartTrans[i])] then phi[transCart[after(cartTrans[i])]]
            else 0))*(if upstream[i] then 1 + exp(-kL[i]*eta*Data.m*boundaries[i,
           side].Ndot/(2*Aprime[i]*Nu_Phi[after(cartTrans[i])])) else 2)
           "1st transverse";
-        kL[i]*eta*mPhidot_boundaries[i, side, Orient.before] = Aprime[i]*Nu_Phi[
+
+        kL[enumAxis[i]]*eta*mPhidot_boundaries[i, side, Orient.before] = Aprime[i]*Nu_Phi[
           before(cartTrans[i])]*(boundaries[i, side].phi[Orient.before] - (if
           inclTrans[before(cartTrans[i])] then phi[transCart[before(cartTrans[i])]]
            else 0))*(if upstream[i] then 1 + exp(-kL[i]*eta*Data.m*boundaries[i,
@@ -1432,7 +1439,7 @@ Choose any condition besides none.");
           "2nd transverse";
 
         // Thermal energy
-        kL[i]*theta*boundaries[i, side].Qdot = Aprime[i]*Nu_Q*(boundaries[i,
+        kL[enumAxis[i]]*theta*boundaries[i, side].Qdot = Aprime[i]*Nu_Q*(boundaries[i,
           side].T - T)*(if upstream[i] then 1 + exp(-kL[i]*theta*Data.c_v(T, p)
           *boundaries[i, side].Ndot/(2*Aprime[i]*Nu_Q)) else 2);
       end for;
@@ -1561,9 +1568,9 @@ Choose any condition besides none.");
         for i in 1:n_intra) + sum(inter[i].phi*inter[i].mPhidot for i in 1:
         n_inter) + sum(intra.Qdot) + sum(inter.Qdot) + sum((Data.h(boundaries[i,
         :].T, boundaries[i, :].p) - {h,h} + (phi_boundaries[i, :] .^ 2 + sum(
-        boundaries[i, :].phi[orient] .^ 2 for orient in Orient))*(Data.m/2))*
+        boundaries[i, :].phi[orient] .^ 2 for orient in 1:Orient.size))*(Data.m/2))*
         boundaries[i, :].Ndot + sum(boundaries[i, :].phi[orient]*boundaries[i,
-        :].mPhidot[orient] for orient in Orient) for i in 1:n_trans) + sum(
+        :].mPhidot[orient] for orient in 1:Orient.size) for i in 1:n_trans) + sum(
         boundaries.Qdot) "Conservation of energy";
     end if;
     annotation (
@@ -1668,6 +1675,7 @@ Choose any condition besides none.");
           initialScale=0.1), graphics),
       Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
               100}}), graphics));
+              
   end Fluid;
 
   model Solid "Base model for an inert, stationary solid"
@@ -1686,7 +1694,7 @@ Choose any condition besides none.");
       final g_IC,
       T(stateSelect=if consEnergy == ConsThermo.dynamic then StateSelect.always
              else StateSelect.default,fixed=consEnergy == ConsThermo.dynamic));
-    parameter Q.Length kL[:]=L[cartTrans] "Effective transport length"
+    parameter Q.Length kL[n_trans]=L "Effective transport length"
       annotation (Dialog(group="Geometry", __Dymola_label=
             "<html><b><i>k&nbsp;L</i></b></html>"));
     // Note:  The size is n_trans, but it isn't specified here to prevent a
@@ -1779,7 +1787,7 @@ protected
             "<html>&nu;</html>"));
 
     // Assumptions
-    parameter Integer n_trans=1 "Number of transport axes" annotation (
+    parameter Integer n_trans=3 "Number of transport axes" annotation (
         HideResult=true, Dialog(tab="Assumptions", __Dymola_label=
             "<html><i>n</i><sub>trans</sub></html>"));
     // This can't be an outer parameter in Dymola 2014.
@@ -1815,15 +1823,14 @@ protected
           __Dymola_label="<html><i>g</i><sub>IC</sub></html>"));
 
     // Independence factors
-    parameter Q.NumberAbsolute k_intra_Phi[n_intra, n_trans]=ones(n_intra,
-        n_trans) "For translational exchange among species within the phase"
+    parameter Q.NumberAbsolute k_intra_Phi[n_intra, n_trans] "For translational exchange among species within the phase"
       annotation (Dialog(group="Independence factors", __Dymola_label=
             "<html><i>k</i><sub>intra &Phi;</sub></html>"));
-    parameter Q.NumberAbsolute k_intra_Q[n_intra]=ones(n_intra)
-      "For thermal exchange among species within the phase" annotation (Dialog(
+    parameter Q.NumberAbsolute k_intra_Q[n_intra]  "For thermal exchange among species within the phase" annotation (Dialog(
           group="Independence factors", __Dymola_label=
             "<html><i>k</i><sub>intra <i>Q</i></sub></html>"));
 
+    Integer enumAxis[Axis.size] = {Axis.x, Axis.y, Axis.z};
     // Preferred states
     // Note:  The start values for these variable aren't fixed because the
     // initial equation section will be used instead.
@@ -1948,20 +1955,20 @@ protected
     outer Q.Volume V "Volume of the phase (not of the subregion)" annotation (
         missingInnerMessage="This model should be used within a phase model.
 ");
-    outer parameter Q.Length L[Axis] "Lengths of the subregion" annotation (
+    outer parameter Q.Length L[Axis.size] "Lengths of the subregion" annotation (
         missingInnerMessage="This model should be used within a subregion model.
 ");
-    outer parameter Integer cartTrans[:]
+    outer parameter Integer cartTrans[n_trans]
       "Cartesian-axis indices of the transport axes" annotation (
         missingInnerMessage="This model should be used within a subregion model.
 ");
     // Note:  The size of cartTrans is n_trans, but it can't be specified here
     // due to an error in Dymola 2014.
-    outer parameter Q.NumberAbsolute k_inter_Phi[:, :]
+    outer parameter Q.NumberAbsolute k_inter_Phi[n_inter, n_trans]
       "Independence factors for translational exchange with other phases"
       annotation (missingInnerMessage="This model should be used within a phase model.
 ");
-    outer parameter Q.NumberAbsolute k_inter_Q[:]
+    outer parameter Q.NumberAbsolute k_inter_Q[n_inter]
       "Independence factors for thermal exchange among with other phases"
       annotation (missingInnerMessage="This model should be used within a phase model.
 ");
@@ -2180,19 +2187,39 @@ public
   package Enumerations "Choices of options"
     extends Modelica.Icons.TypesPackage;
 
-    type Axis = enumeration(
-        x "X",
-        y "Y",
-        z "Z") "Enumeration for Cartesian axes";
-    type Orient = enumeration(
-        after "Axis following the normal axis in Cartesian coordinates",
-        before "Axis preceding the normal axis in Cartesian coordinates")
-      "Enumeration for orientations relative to a boundary" annotation (
-        Documentation(info="
-    <html><p><code>Orient.after</code> indicates the axis following the axis normal to the boundary
-    in Cartesian coordinates (x, y, z).
-    <code>Orient.before</code> indicates the axis preceding the normal axis
-    in Cartesian coordinates (or following it twice).</p></html>"));
+//    type Axis = enumeration(
+//       x "X",
+//       y "Y",
+//       z "Z") "Enumeration for Cartesian axes";
+
+    record Axis
+       constant Integer x = 1;
+       constant Integer y = 2;
+       constant Integer z = 3;
+       constant Integer size = 3;
+    end Axis;
+
+//    type Orient = enumeration(
+//        after "Axis following the normal axis in Cartesian coordinates",
+//        before "Axis preceding the normal axis in Cartesian coordinates")
+//      "Enumeration for orientations relative to a boundary" annotation (
+//        Documentation(info="
+//    <html><p><code>Orient.after</code> indicates the axis following the axis normal to the boundary
+//    in Cartesian coordinates (x, y, z).
+//    <code>Orient.before</code> indicates the axis preceding the normal axis
+//    in Cartesian coordinates (or following it twice).</p></html>"));
+
+    record Orient    
+      constant Integer after = 1 "Axis following the normal axis in Cartesian coordinates";
+      constant Integer before = 2 "Axis preceding the normal axis in Cartesian coordinates";
+      constant Integer size = 2;
+      annotation (Documentation(info="
+      <html>Enumeration for orientations relative to a boundary<p><code>Orient.after</code> indicates the axis following the axis normal to the boundary
+      in Cartesian coordinates (x, y, z).
+      <code>Orient.before</code> indicates the axis preceding the normal axis
+      in Cartesian coordinates (or following it twice).</p></html>"));
+    end Orient;
+    
     type Side = enumeration(
         n "Negative",
         p "Positive (greater position along the Cartesian axis)")

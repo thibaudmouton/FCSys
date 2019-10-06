@@ -16,6 +16,7 @@ package Regions "3D arrays of discrete, interconnected subregions"
         environment.analysis "Electrical potential";
       output Q.ResistanceElectrical R=w/zI if environment.analysis
         "Measured electrical resistance";
+        
       output Q.ResistanceElectrical R_ex=anFP.L[Axis.x]/(anFP.subregions[1, 1,
           1].graphite.'e-'.sigma*anFP.A[Axis.x]*anFP.subregions[1, 1, 1].graphite.epsilon
           ^1.5) if environment.analysis "Expected electrical resistance";
@@ -2219,9 +2220,14 @@ The default thermal conductivity of the carbon (&theta; = <code>U.m*U.K/(1.18*U.
               'SO3-'(final mu=0,final epsilon=1),
               'H+'(initEnergy=Init.none, sigma=0.1*U.S/U.cm),
               H2O(initEnergy=Init.none,upstreamX=false))),
-        subregions(ionomer('H+'(consTransX={{{if x > 1 or (y == 1 and z == 1)
-                   then ConsTrans.steady else ConsTrans.dynamic for z in 1:n_z}
-                  for y in 1:n_y} for x in 1:n_x})))) annotation (IconMap(
+        subregions(
+        ionomer('H+'(
+        consTransX={{{if x > 1 or (y == 1 and z == 1)
+                   then Integer(ConsTrans.steady) else Integer(ConsTrans.dynamic)
+                   for z in 1:n_z}
+                  for y in 1:n_y}
+                   for x in 1:n_x}
+        )))) annotation (IconMap(
             primitivesVisible=false));
 
     protected
@@ -3228,10 +3234,13 @@ For more information, please see the
         compact=true));
 
     // Auxiliary parameters (for analysis only)
-    final parameter Q.Length L[Axis]={sum(L_x),sum(L_y),sum(L_z)} if
+
+    final parameter Q.Length L[Axis.size]={sum(L_x),sum(L_y),sum(L_z)} if
       hasSubregions "Length";
-    final parameter Q.Area A[Axis]={L[cartWrap(axis + 1)]*L[cartWrap(axis + 2)]
-        for axis in Axis} if hasSubregions "Cross-sectional areas";
+      
+    final parameter Q.Area A[Axis.size]={L[cartWrap(axis + 1)]*L[cartWrap(axis + 2)]
+        for axis in Axis.x:Axis.z} if hasSubregions "Cross-sectional areas";
+        
     final parameter Q.Volume V=product(L) if hasSubregions "Volume";
 
     replaceable model Subregion = Subregions.Subregion constrainedby
